@@ -41,7 +41,8 @@ import cv2
 import numpy as np
 
 DEBUG = False
-STATS_DIR = './stats'
+STATS_DIR = 'stats'
+PATTERNS_DIR='patterns'
 FARMING_INTERVAL = 30
 PROGRESSION_INTERVAL = 30
 FISHING_INTERVAL = 30
@@ -220,7 +221,7 @@ def find_single_grey_old(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=
     return [Region(top_left[0], top_left[1], width_pattern, height_pattern)]
 
 
-def find_lvlup(image, pattern):
+def find_lvlup(image, pattern,all=False):
     t_min = 128
     t_max = 255
     reg = find_single_grey(image, pattern)
@@ -238,11 +239,11 @@ def find_progress_button(image, pattern):
     return find_single_grey(image, pattern, threshold=0.9)
 
 
-def find_single_grey_90(image, pattern):
+def find_single_grey_90(image, pattern,all=False):
     return find_single_grey(image, pattern, threshold=0.9)
 
 
-def find_single_grey_95(image, pattern):
+def find_single_grey_95(image, pattern,all=False):
     return find_single_grey(image, pattern, threshold=0.95)
 
 
@@ -256,7 +257,7 @@ def find_level(image, pattern):
     return find_single_grey(image, pattern, threshold=0.96)
 
 
-def find_checked_skills(image, pattern):
+def find_checked_skills(image, pattern,all=False):
     image = image.get_threshold(128, 255)
     pattern = pattern.get_threshold(128, 255)
     cv2.imshow("find_checked_skills:image", image.get_array())
@@ -874,8 +875,11 @@ class ClickerHeroes(metaclass=Singleton):
             scale = height / (1600.0 * 9 / 16)
         if height > width * 9.0 / 16:
             scale = width / 1600.0
-
-        self.load_patterns('.\\patterns', self.patterns, scale)
+        self.script_path=os.path.realpath(__file__)
+        self.script_dir=os.path.dirname(self.script_path)
+        self.stats_dir=os.path.join(self.script_dir,STATS_DIR)
+        self.patterns_path=os.path.join(self.script_dir,PATTERNS_DIR)
+        self.load_patterns(self.patterns_path, self.patterns, scale)
         self.hero_patterns_location_cache = {}
         for menu_name in ('heroes', 'ancients'):
             self.menus[menu_name] = {}
@@ -1309,7 +1313,7 @@ class ClickerHeroes(metaclass=Singleton):
 
     def save_sorted_heroes_list(self, menu_name, shl):
         try:
-            shl_filename = STATS_DIR + '/%s_sorted_heroes_list.dat' % menu_name
+            shl_filename = os.path.join(self.stats_dir,'%s_sorted_heroes_list.dat' % menu_name)
             with tempfile.NamedTemporaryFile(mode='w+t', delete=False, dir=STATS_DIR) as temp_file:
                 json.dump(shl, temp_file)
             if os.path.isfile(shl_filename):
@@ -1328,8 +1332,8 @@ class ClickerHeroes(metaclass=Singleton):
 
     def save_container(self, menu_name, container_name, container):
         try:
-            shl_filename = STATS_DIR + '/%s_%s' % (menu_name, container_name)
-            with tempfile.NamedTemporaryFile(mode='w+t', delete=False, dir=STATS_DIR) as temp_file:
+            shl_filename = os.path.join(self.stats_dir, '%s_%s' % (menu_name, container_name))
+            with tempfile.NamedTemporaryFile(mode='w+t', delete=False, dir=self.stats_dir) as temp_file:
                 json.dump(container, temp_file)
             if os.path.isfile(shl_filename):
                 shutil.copy(shl_filename, shl_filename + '.bck')
@@ -1339,7 +1343,8 @@ class ClickerHeroes(metaclass=Singleton):
 
     def load_container(self, menu_name, container_name, default_container):
         try:
-            fn = STATS_DIR + '/%s_%s' % (menu_name, container_name)
+            fn = os.path.join(self.stats_dir, '%s_%s' % (menu_name, container_name))
+            # fn = STATS_DIR + '/%s_%s' % (menu_name, container_name)
             with open(fn, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
@@ -1971,11 +1976,11 @@ class ClickerHeroes(metaclass=Singleton):
         return name
 
     def open_menu(self, menu_name):
-        cur_menu = self.get_current_menu()
+        # cur_menu = self.get_current_menu()
         # print('open_menu: menu name is %s ' % (cur_menu))
-        if cur_menu == menu_name:
-            return
-        self.close_menu(cur_menu)
+        # if cur_menu == menu_name:
+        #     return
+        self.close_menu()
         pat_list = self.get_pattern('main', menu_name + '_menu')
         reg = self.find_pattern_from_list(pat_list)
         if not reg:
@@ -1985,9 +1990,15 @@ class ClickerHeroes(metaclass=Singleton):
     def getCurrentMenu(self):
         return self.currentmenu_name
 
-    def close_menu(self, menu_name):
-        self.wait_for_pattern_name(menu_name, 'close_menu')
-        self.click_pattern(menu_name, 'close_menu', all=False)
+    def close_menu(self, menu_name=None):
+        # self.wait_for_pattern_name(menu_name, 'close_menu')
+        while 1:
+            self.wait_for_pattern_list(self.get_pattern('buttons', 'button_close_menu'))
+            if not self.click_pattern('buttons', 'button_close_menu', all=True):
+                break
+
+
+        # self.click_pattern(menu_name, 'close_menu', all=False)
 
     def close_popups(self, menu_name):
         self.wait_for_pattern_name(menu_name, 'close_menu')
@@ -1997,7 +2008,7 @@ class ClickerHeroes(metaclass=Singleton):
         pat_list = self.get_pattern(menu_name, pat_name)
         return self.wait_for_pattern_list(pat_list)
 
-    def wait_for_pattern_list(self, pat_list, wait=-1):
+    def wait_for_pattern_list(self, pat_list, wait=1):
         delay = 0.05
         wait_start = time.clock()
         total_delay = 0
@@ -2017,7 +2028,7 @@ class ClickerHeroes(metaclass=Singleton):
     def click_pattern(self, menu_name, pattern_name, all=False, refresh=True):
         patt_list = self.get_pattern(menu_name, pattern_name)
         if patt_list:
-            regs = self.find_pattern_from_list(patt_list,all=False)
+            regs = self.find_pattern_from_list(patt_list,all=all)
             if regs:
                 for reg in regs:
                     self.click_region(reg)
@@ -2417,6 +2428,7 @@ class ClickerHeroes(metaclass=Singleton):
 
     def buy_quick_ascension(self):
         self.window.makeScreenshotClientAreaRegion()
+        self.close_menu()
         with self.window.lock:
             if self.click_pattern('main', 'button_shop'):
                 if self.wait_for_pattern_list(self.get_pattern('shop', 'shop_title')):
@@ -2431,7 +2443,8 @@ class ClickerHeroes(metaclass=Singleton):
 
                     else:
                         if self.wait_for_pattern_list(self.get_pattern('shop', 'title_you_need_more_rubies')):
-                            self.click_pattern('shop', 'button_no')
+                            self.click_pattern('shop', 'button_close_menu', all=True)
+                            # self.click_pattern('shop', 'button_no')
                             return False
         return True
 
@@ -2955,10 +2968,10 @@ def levelup_heroes(click_lock):
         # try:
         # ch.window.makeScreenshotClientAreaRegion()
         ch.buy_quick_ascension()
-        # ch.reindex_heroes_list('heroes')
+        ch.reindex_heroes_list('heroes')
         #     if ch.lvlup_all_heroes('heroes', max_level=150, timer=600):
         #         continue
-        # ch.lvlup_top_heroes('heroes')
+        ch.lvlup_top_heroes('heroes')
         # ch.buy_quick_ascension()
 
         # ch.lvlup_all_heroes('heroes', timer=10)
