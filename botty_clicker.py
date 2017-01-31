@@ -1980,7 +1980,7 @@ class ClickerHeroes(metaclass=Singleton):
         # print('open_menu: menu name is %s ' % (cur_menu))
         # if cur_menu == menu_name:
         #     return
-        self.close_menu()
+        self.close_menu(wait=None)
         pat_list = self.get_pattern('main', menu_name + '_menu')
         reg = self.find_pattern_from_list(pat_list)
         if not reg:
@@ -1990,10 +1990,10 @@ class ClickerHeroes(metaclass=Singleton):
     def getCurrentMenu(self):
         return self.currentmenu_name
 
-    def close_menu(self, menu_name=None):
+    def close_menu(self, menu_name=None,wait=1):
         # self.wait_for_pattern_name(menu_name, 'close_menu')
         while 1:
-            self.wait_for_pattern_list(self.get_pattern('buttons', 'button_close_menu'))
+            self.wait_for_pattern_list(self.get_pattern('buttons', 'button_close_menu'),wait=wait)
             if not self.click_pattern('buttons', 'button_close_menu', all=True):
                 break
 
@@ -2013,11 +2013,13 @@ class ClickerHeroes(metaclass=Singleton):
         wait_start = time.clock()
         total_delay = 0
 
-        while wait==-1 or total_delay <= wait:
+        while wait is None or wait==-1 or total_delay <= wait:
             self.window.makeScreenshotClientAreaRegion()
             reg=self.find_pattern_from_list(pat_list)
             if reg:
                 return reg
+            if wait is None:
+                return None
             time.sleep(delay)
             # if time.clock() - wait_start >= wait:
             #     return None
@@ -2026,6 +2028,8 @@ class ClickerHeroes(metaclass=Singleton):
         return None
 
     def click_pattern(self, menu_name, pattern_name, all=False, refresh=True):
+        if refresh:
+            self.window.makeScreenshotClientAreaRegion()
         patt_list = self.get_pattern(menu_name, pattern_name)
         if patt_list:
             regs = self.find_pattern_from_list(patt_list,all=all)
@@ -2475,6 +2479,11 @@ class ClickerHeroes(metaclass=Singleton):
                     print("try_skill_combos: Combo %s is ready to activate" % combo)
                 self.window.pressKeyList(combo)
 
+    def start_play(self):
+        if self.click_pattern('buttons','button_play'):
+            if self.click_pattern('buttons', 'button_close_menu'):
+                return True
+        return None
 
 class Window:
     def __init__(self, hwnd, lock):
@@ -2947,8 +2956,13 @@ class Region:
         return Region(self.getX() + x[0], self.getY() + x[1], self.getWidth(), self.getHeight())
 
 
-def get_collectables(click_lock):
+def get_collectables(click_lock,start_condition):
     ch = ClickerHeroes(click_lock)
+    print("get_collectables: Started")
+    ch.start_play()
+    with start_condition:
+        start_condition.notify_all()
+
     while True:
         # try:
         ch.collect_fish()
@@ -2962,7 +2976,10 @@ def get_collectables(click_lock):
         #     continue
 
 
-def levelup_heroes(click_lock):
+def levelup_heroes(click_lock,start_condition):
+    with start_condition:
+        start_condition.wait()
+    print("levelup_heroes: Started")
     ch = ClickerHeroes(click_lock)
     while True:
         # try:
@@ -2982,7 +2999,10 @@ def levelup_heroes(click_lock):
         #     continue
 
 
-def progress_levels(click_lock):
+def progress_levels(click_lock,start_condition):
+    with start_condition:
+        start_condition.wait()
+    print("progress_levels: Started")
     ch = ClickerHeroes(click_lock)
     while True:
         # try:
@@ -3010,11 +3030,11 @@ def main(meq):
 
 if __name__ == '__main__':
     c_lock = multiprocessing.RLock()
-
+    start_condition = multiprocessing.Condition()
     mp_target = [progress_levels, get_collectables, levelup_heroes]
     proc = []
     for target in mp_target:
-        proc.append(Process(target=target, args=(c_lock,)))
+        proc.append(Process(target=target, args=(c_lock,start_condition,)))
     for p in proc:
         p.start()
 
