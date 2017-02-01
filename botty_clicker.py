@@ -236,25 +236,25 @@ def find_lvlup(image, pattern,all=False):
 
 
 def find_progress_button(image, pattern):
-    return find_single_grey(image, pattern, threshold=0.9)
+    return find_single_grey(image, pattern, threshold=0.9,all=all)
 
 
 def find_single_grey_90(image, pattern,all=False):
-    return find_single_grey(image, pattern, threshold=0.9)
+    return find_single_grey(image, pattern, threshold=0.9,all=all)
 
 
 def find_single_grey_95(image, pattern,all=False):
-    return find_single_grey(image, pattern, threshold=0.95)
+    return find_single_grey(image, pattern, threshold=0.95,all=all)
 
 
-def find_single_grey_97(image, pattern):
-    return find_single_grey(image, pattern, threshold=0.97)
+def find_single_grey_97(image, pattern,all=False):
+    return find_single_grey(image, pattern, threshold=0.97,all=all)
 
 
-def find_level(image, pattern):
+def find_level(image, pattern,all=False):
     image = image.get_threshold(235, 255)
     pattern = pattern.get_threshold(235, 255)
-    return find_single_grey(image, pattern, threshold=0.96)
+    return find_single_grey(image, pattern, threshold=0.96,all=all)
 
 
 def find_checked_skills(image, pattern,all=False):
@@ -275,6 +275,9 @@ def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8,
         return None
     pattern_grey = pattern.get_grey_array()
     image_grey = image.get_grey_array()
+    if all:
+        image_grey = image_grey.copy()
+
     regions=[]
     while 1:
         try:
@@ -595,8 +598,8 @@ class Image:
         return self.fromArray(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY))
 
     def get_grey_array(self):
-        # if self.is_grey():
-        #     return self.img
+        if self.is_grey():
+            return self.img
         return cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
 
     def get_canny_array(self):
@@ -899,7 +902,7 @@ class ClickerHeroes(metaclass=Singleton):
                                                                                       list(self.get_hero_list(
                                                                                           menu_name)))
         self.window.makeScreenshotClientAreaRegion()
-        self.set_monster_click_location()
+        # self.set_monster_click_location()
 
     def do(self):
         self.screenShot = self.window.getScreenshot()
@@ -1976,10 +1979,11 @@ class ClickerHeroes(metaclass=Singleton):
         return name
 
     def open_menu(self, menu_name):
-        # cur_menu = self.get_current_menu()
-        # print('open_menu: menu name is %s ' % (cur_menu))
-        # if cur_menu == menu_name:
-        #     return
+        cur_menu = self.get_current_menu()
+        if DEBUG:
+            print('open_menu: menu name is %s ' % (cur_menu))
+        if cur_menu == menu_name:
+           return
         self.close_menu(wait=None)
         pat_list = self.get_pattern('main', menu_name + '_menu')
         reg = self.find_pattern_from_list(pat_list)
@@ -2043,7 +2047,7 @@ class ClickerHeroes(metaclass=Singleton):
                 return True
         return None
 
-    def set_monster_click_location(self):
+    def get_monster_click_location(self):
         if not self.click_monster_location:
             next_lvl_button = self.find_pattern_from_list(self.get_pattern('main', 'levelnext'))
             if next_lvl_button:
@@ -2069,8 +2073,12 @@ class ClickerHeroes(metaclass=Singleton):
             # click_y is halfway between current level rect and shop button
             click_y = (shop_y + y_n) // 2
             self.click_monster_location = Location(click_x, click_y)
+        return self.click_monster_location
 
-    def get_monster_click_location(self):
+    # def get_monster_click_location(self):
+    #     if self.click_monster_location is None:
+    #         self.set_monster_click_location()
+
         return self.click_monster_location
 
     def click_monster(self, cps=10):
@@ -2481,7 +2489,7 @@ class ClickerHeroes(metaclass=Singleton):
 
     def start_play(self):
         if self.click_pattern('buttons','button_play'):
-            if self.click_pattern('buttons', 'button_close_menu'):
+            if self.click_pattern('buttons', 'button_close_menu',all=True):
                 return True
         return None
 
@@ -2956,13 +2964,11 @@ class Region:
         return Region(self.getX() + x[0], self.getY() + x[1], self.getWidth(), self.getHeight())
 
 
-def get_collectables(click_lock,start_condition):
+def get_collectables(click_lock, start_barrier):
     ch = ClickerHeroes(click_lock)
     print("get_collectables: Started")
     ch.start_play()
-    with start_condition:
-        start_condition.notify_all()
-
+    start_barrier.wait()
     while True:
         # try:
         ch.collect_fish()
@@ -2976,15 +2982,14 @@ def get_collectables(click_lock,start_condition):
         #     continue
 
 
-def levelup_heroes(click_lock,start_condition):
-    with start_condition:
-        start_condition.wait()
+def levelup_heroes(click_lock,start_barrier):
+    start_barrier.wait()
     print("levelup_heroes: Started")
     ch = ClickerHeroes(click_lock)
     while True:
         # try:
         # ch.window.makeScreenshotClientAreaRegion()
-        ch.buy_quick_ascension()
+        # ch.buy_quick_ascension()
         ch.reindex_heroes_list('heroes')
         #     if ch.lvlup_all_heroes('heroes', max_level=150, timer=600):
         #         continue
@@ -2999,9 +3004,8 @@ def levelup_heroes(click_lock,start_condition):
         #     continue
 
 
-def progress_levels(click_lock,start_condition):
-    with start_condition:
-        start_condition.wait()
+def progress_levels(click_lock,start_barrier):
+    start_barrier.wait()
     print("progress_levels: Started")
     ch = ClickerHeroes(click_lock)
     while True:
@@ -3032,9 +3036,11 @@ if __name__ == '__main__':
     c_lock = multiprocessing.RLock()
     start_condition = multiprocessing.Condition()
     mp_target = [progress_levels, get_collectables, levelup_heroes]
+    # mp_target = [levelup_heroes]
+    start_barrier=multiprocessing.Barrier(len(mp_target))
     proc = []
     for target in mp_target:
-        proc.append(Process(target=target, args=(c_lock,start_condition,)))
+        proc.append(Process(target=target, args=(c_lock,start_barrier,)))
     for p in proc:
         p.start()
 
