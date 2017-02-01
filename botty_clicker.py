@@ -359,10 +359,10 @@ def find_all_grey_old(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8
     return regRet
 
 
-def find_pattern_hist(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8, corr_coeff=0.9):
+def find_pattern_hist(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8, corr_coeff=0.9,all=False):
     pattern_grey = pattern.get_grey()
     image_grey = image.get_grey()
-    reg_list = find_single_grey(image_grey, pattern_grey, method, threshold)
+    reg_list = find_single_grey(image_grey, pattern_grey, method=method, threshold=threshold,all=all)
     print('find_pattern_hist: reg_list %s' % (reg_list))
     pattern_region = None
     if reg_list:
@@ -1120,47 +1120,48 @@ class ClickerHeroes(metaclass=Singleton):
 
         for hero_name in heroes_to_lvlup:
             self.lvlup_hero(menu_name, hero_name, max_level=max_level)
+        return
             ###Buy heroes skill except ascension
-            hero_reg = self.scroll_to_hero(menu_name, hero_name)
-            hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
-            skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
-            if skills_reg:
-                continue
-
-            if hero_name == 'amenhotep':
-                ascend_skill_reg = hero_reg_scr.find_pattern_from_list(
-                    self.get_pattern('heroes_skills', 'amenhotep_ascend'),
-                    cache=False)
-                if ascend_skill_reg:
-                    ascend_skill_reg = ascend_skill_reg[0]
-                else:
-                    continue
-            else:
-                ascend_skill_reg = None
-            button_edge_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_button', 'edge_'),
-                                                                  cache=False)
-            if button_edge_reg is None:
-                continue
-            button_edge_reg = button_edge_reg[0]
-            hero_name_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern(menu_name, hero_name))
-            if hero_name_reg is None:
-                continue
-            hero_name_reg = hero_name_reg[0]
-            skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
-            skills_reg_right_x = hero_name_reg.getRight()
-            y = hero_reg.getTop() + skills_reg_left_y
-            for i in range(100):
-                x = hero_reg.getLeft() + skills_reg_left_x + int(
-                    random.random() * (skills_reg_right_x - skills_reg_left_x))
-                if ascend_skill_reg and ascend_skill_reg.contains((x - hero_reg.getLeft(), y - hero_reg.getTop())):
-                    continue
-                hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
-                cv2.imshow("hero_reg_scr", hero_reg_scr.get_array())
-                cv2.waitKey(50)
-                # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
-                # if skills_reg:
-                #     break
-                self.window.click(x, y, cps=5)
+            # hero_reg = self.scroll_to_hero(menu_name, hero_name)
+            # hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
+            # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
+            # if skills_reg:
+            #     continue
+            #
+            # if hero_name == 'amenhotep':
+            #     ascend_skill_reg = hero_reg_scr.find_pattern_from_list(
+            #         self.get_pattern('heroes_skills', 'amenhotep_ascend'),
+            #         cache=False)
+            #     if ascend_skill_reg:
+            #         ascend_skill_reg = ascend_skill_reg[0]
+            #     else:
+            #         continue
+            # else:
+            #     ascend_skill_reg = None
+            # button_edge_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_button', 'edge_'),
+            #                                                       cache=False)
+            # if button_edge_reg is None:
+            #     continue
+            # button_edge_reg = button_edge_reg[0]
+            # hero_name_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern(menu_name, hero_name))
+            # if hero_name_reg is None:
+            #     continue
+            # hero_name_reg = hero_name_reg[0]
+            # skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
+            # skills_reg_right_x = hero_name_reg.getRight()
+            # y = hero_reg.getTop() + skills_reg_left_y
+            # for i in range(100):
+            #     x = hero_reg.getLeft() + skills_reg_left_x + int(
+            #         random.random() * (skills_reg_right_x - skills_reg_left_x))
+            #     if ascend_skill_reg and ascend_skill_reg.contains((x - hero_reg.getLeft(), y - hero_reg.getTop())):
+            #         continue
+            #     hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
+            #     cv2.imshow("hero_reg_scr", hero_reg_scr.get_array())
+            #     cv2.waitKey(50)
+            #     # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
+            #     # if skills_reg:
+            #     #     break
+            #     self.window.click(x, y, cps=5)
 
     def lvlup_top_heroes(self, menu_name, dist=0):
         self.window.makeScreenshotClientAreaRegion()
@@ -2427,13 +2428,13 @@ class ClickerHeroes(metaclass=Singleton):
                     random.random() * (skills_reg_right_x - skills_reg_left_x))
                 if ascend_skill_reg and ascend_skill_reg.contains((x - hero_reg.getLeft(), y - hero_reg.getTop())):
                     continue
-                hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
-                cv2.imshow("hero_reg_scr", hero_reg_scr.get_array())
-                cv2.waitKey(50)
+                # hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
+                # cv2.imshow("hero_reg_scr", hero_reg_scr.get_array())
+                # cv2.waitKey(10)
                 # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
                 # if skills_reg:
                 #     break
-                self.window.click(x, y, cps=10)
+                self.window.click(x, y, cps=30)
             self.save_container(menu_name,'heroes_need_skills_upgrade_list',heroes_need_skills_upgrade_list)
             self.skills_upgrades_time = time.clock()
             return True
@@ -2465,7 +2466,7 @@ class ClickerHeroes(metaclass=Singleton):
         if max_seen_hero is None:
             return None
         self.scroll_to_hero(menu_name, max_seen_hero)
-        while not self.click_pattern('main', 'buy_available_upgrades_old'):
+        while not self.click_pattern('main', 'buy_available_upgrades'):
             self.scroll_menu(menu_name, WHEEL_DOWN)
             self.scroll_menu(menu_name, WHEEL_UP)
             self.scroll_menu(menu_name, WHEEL_DOWN)
@@ -2996,9 +2997,9 @@ def levelup_heroes(click_lock,start_barrier):
         ch.lvlup_top_heroes('heroes')
         # ch.buy_quick_ascension()
 
-        # ch.lvlup_all_heroes('heroes', timer=10)
-        # ch.buy_available_upgrades_old()
-        # ch.ascend(ascension_life=60, check_timer=30, check_progress=False)
+        ch.lvlup_all_heroes('heroes', timer=60)
+        ch.buy_available_upgrades()
+        ch.ascend(ascension_life=60, check_timer=30, check_progress=False)
         # except Exception as e:
         #     print("levelup_heroes:Exception:%s" % repr(e))
         #     continue
@@ -3016,20 +3017,11 @@ def progress_levels(click_lock,start_barrier):
         ch.progress_level(farm_mode_timer=300, boss_timer=30)
         # ch.try_skill_combos('12345')
         ch.try_skill_combos('869', '123457')
-
-        # cv2.waitKey(50)
         time.sleep(0.1)
         # except Exception as e:
         #     print("progress_levels:Exception:%s" % repr(e))
         #     continue
 
-
-def main(meq):
-    ch = ClickerHeroes(click_lock)
-    while True:
-        me = meq.get()
-        print("got MouseEvent %s" % me)
-        me.apply()
 
 
 if __name__ == '__main__':
