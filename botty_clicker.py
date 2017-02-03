@@ -2346,18 +2346,18 @@ class ClickerHeroes(metaclass=Singleton):
     def cache_state_is_valid(self):
         return self.get_cache_state()
 
-    def buy_available_upgrades_old(self):
-        self.window.makeScreenshotClientAreaRegion()
-
-        menu_name = 'heroes'
-        max_seen_hero = self.get_max_seen_hero(menu_name)
-        if max_seen_hero is None:
-            return None
-        self.scroll_to_hero(menu_name, max_seen_hero)
-        while not self.click_pattern('main', 'buy_available_upgrades_old'):
-            self.scroll_menu(menu_name, WHEEL_DOWN)
-            self.scroll_menu(menu_name, WHEEL_UP)
-            self.scroll_menu(menu_name, WHEEL_DOWN)
+    # def buy_available_upgrades_old(self):
+    #     self.window.makeScreenshotClientAreaRegion()
+    #
+    #     menu_name = 'heroes'
+    #     max_seen_hero = self.get_max_seen_hero(menu_name)
+    #     if max_seen_hero is None:
+    #         return None
+    #     self.scroll_to_hero(menu_name, max_seen_hero)
+    #     while not self.click_pattern('main', 'buy_available_upgrades_old'):
+    #         self.scroll_menu(menu_name, WHEEL_DOWN)
+    #         self.scroll_menu(menu_name, WHEEL_UP)
+    #         self.scroll_menu(menu_name, WHEEL_DOWN)
 
     def buy_available_upgrades(self, upgrades_timer=300):
         curr_time = time.clock()
