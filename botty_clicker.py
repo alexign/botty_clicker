@@ -1487,8 +1487,10 @@ class ClickerHeroes(metaclass=Singleton):
         # self.mouse_event_queue.put(l)
         # # self.mouse_event_queue.put('123123123')
         # self.mp_event.wait()
-        ret = self.window.click_location(loc, refresh=refresh)
-        return ret
+
+        return  self.window.click_location(loc, refresh=refresh)
+
+
 
     def click_region(self, reg, refresh=False):
 
@@ -3017,7 +3019,6 @@ def progress_levels(click_lock,start_barrier):
         ch.progress_level(farm_mode_timer=300, boss_timer=30)
         # ch.try_skill_combos('12345')
         ch.try_skill_combos('869', '123457')
-        time.sleep(0.1)
         # except Exception as e:
         #     print("progress_levels:Exception:%s" % repr(e))
         #     continue
