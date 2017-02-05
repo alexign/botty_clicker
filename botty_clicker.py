@@ -1605,6 +1605,11 @@ class ClickerHeroes(metaclass=Singleton):
         self.cache_visible_heroes(menu_name, visible_heroes_names)
         # Sort visible heroes list by y position
         return sorted(visible_heroes, key=lambda x: x[1].y)
+    def get_ever_seen_heroes(self,menu_name):
+        shl=self.get_sorted_heroes_list(menu_name)
+        if not shl:
+            return None
+        return shl[:self.get_max_seen_hero(menu_name)]
 
     def get_visible_heroes(self, menu_name, number_of_vh=MAX_NUMBER_OF_VISIBLE_HEROES):
         self.open_menu(menu_name)
@@ -1702,6 +1707,8 @@ class ClickerHeroes(metaclass=Singleton):
         visible_heroes = sorted(visible_heroes, key=lambda x: x[1].y)
         if visible_heroes:
             visible_heroes_names = list(zip(*visible_heroes))[0]
+
+
             self.cache_visible_heroes(menu_name, visible_heroes)
         # Sort visible heroes list by y position
         return visible_heroes
@@ -2367,6 +2374,7 @@ class ClickerHeroes(metaclass=Singleton):
         self.window.makeScreenshotClientAreaRegion()
         menu_name = 'heroes'
         max_seen_hero = self.get_max_seen_hero(menu_name)
+        ever_seen_heroes=self.get_ever_seen_heroes(menu_name)
         if max_seen_hero is None:
             return None
         self.scroll_to_hero(menu_name, max_seen_hero)
@@ -2394,7 +2402,7 @@ class ClickerHeroes(metaclass=Singleton):
             return None
 
 
-        heroes_to_lvlup = [hero_name for hero_name in heroes_need_skills_upgrade_list if hero_name in sorted_hero_list]
+        heroes_to_lvlup = [hero_name for hero_name in heroes_need_skills_upgrade_list if hero_name in ever_seen_heroes]
 
         for hero_name in heroes_to_lvlup:
             ###Buy heroes skill except ascension
@@ -2403,6 +2411,7 @@ class ClickerHeroes(metaclass=Singleton):
             skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
             if skills_reg:
                 heroes_need_skills_upgrade_list.remove(hero_name)
+                self.heroes_upgraded.append(hero_name)
                 continue
             ascend_skill_reg = None
             if hero_name == 'amenhotep':
