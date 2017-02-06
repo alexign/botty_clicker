@@ -897,11 +897,11 @@ class ClickerHeroes(metaclass=Singleton):
             self.menus[menu_name]['visible_heroes_cache'] = None
             # self.menus[menu_name]['hero_level'] = self.load_heroes_levels(menu_name)
             self.menus[menu_name]['hero_level'] = self.load_container(menu_name, "hero_level", {})
-            self.menus[menu_name]['heroes_upgraded'] = self.load_container(menu_name,
-                                                                                      "heroes_upgraded",
+            self.menus[menu_name]['heroes_upgraded_list'] = self.load_container(menu_name,
+                                                                                      "heroes_upgraded_list",
                                                                                       list(self.get_hero_list(
                                                                                           menu_name)))
-            
+            self.menus[menu_name]['ever_seen_heroes']=set()
         self.window.makeScreenshotClientAreaRegion()
         # self.set_monster_click_location()
 
@@ -1608,22 +1608,25 @@ class ClickerHeroes(metaclass=Singleton):
         return sorted(visible_heroes, key=lambda x: x[1].y)
 
     def get_ever_seen_heroes(self,menu_name):
-
-        shl=self.get_sorted_heroes_list(menu_name)
-        if not shl:
-            return None
-
-        hl=self.get_hero_list(menu_name)
-        if not hl:
-            return None
-        msh=self.get_max_seen_hero(menu_name)
-        if not msh:
-            return None
-
-        mshi=hl.index(msh)
+        #
+        #
+        # shl=self.get_sorted_heroes_list(menu_name)
+        # if not shl:
+        #     return None
+        #
+        # hl=self.get_hero_list(menu_name)
+        # if not hl:
+        #     return None
+        # msh=self.get_max_seen_hero(menu_name)
+        # if not msh:
+        #     return None
+        #
+        # mshi=hl.index(msh)`
 
         # return shl[:hl.index(self.get_max_seen_hero(menu_name))]
         return self.menus[menu_name]['ever_seen_heroes']
+    def add_ever_seen_heroes(self,menu_name,hero_name):
+        self.menus[menu_name]['ever_seen_heroes'].update(hero_name)
 
     def get_visible_heroes(self, menu_name, number_of_vh=MAX_NUMBER_OF_VISIBLE_HEROES):
         self.open_menu(menu_name)
@@ -2412,22 +2415,18 @@ class ClickerHeroes(metaclass=Singleton):
         sorted_hero_list = self.get_sorted_heroes_list(menu_name)
         if sorted_hero_list is None:
             return None
-        heroes_upgraded_list = self.menus[menu_name]['heroes_upgraded']
+        heroes_upgraded_list = self.menus[menu_name]['heroes_upgraded_list']
         if heroes_upgraded_list is None:
             return None
 
 
-        heroes_to_lvlup = [hero_name for hero_name in ever_seen_heroes if hero_name in heroes_upgraded_list]
+        heroes_to_lvlup = [hero_name for hero_name in ever_seen_heroes if hero_name not in heroes_upgraded_list]
 
         for hero_name in heroes_to_lvlup:
             ###Buy heroes skill except ascension
             hero_reg = self.scroll_to_hero(menu_name, hero_name)
             hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
-            skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
-            if skills_reg:
-                heroes_upgraded_list.remove(hero_name)
-                self.heroes_upgraded.append(hero_name)
-                continue
+
             ascend_skill_reg = None
             if hero_name == 'amenhotep':
                 ascend_skill_reg = hero_reg_scr.find_pattern_from_list(
@@ -2461,6 +2460,12 @@ class ClickerHeroes(metaclass=Singleton):
                 # if skills_reg:
                 #     break
                 self.window.click(x, y, cps=30)
+            hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
+            skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
+            heroes_upgraded_list=self.menus[menu_name]['heroes_upgraded_list']
+            if skills_reg:
+                # heroes_upgraded_list.remove(hero_name)
+                heroes_upgraded_list.append(hero_name)
             self.save_container(menu_name,'heroes_upgraded_list',heroes_upgraded_list)
             self.skills_upgrades_time = time.clock()
             return True
