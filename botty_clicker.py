@@ -901,7 +901,7 @@ class ClickerHeroes(metaclass=Singleton):
                                                                                       "heroes_upgraded_list",
                                                                                       list(self.get_hero_list(
                                                                                           menu_name)))
-            self.menus[menu_name]['ever_seen_heroes']=set()
+            self.menus[menu_name]['last_ascend_seen_heroes']=set()
         self.window.makeScreenshotClientAreaRegion()
         # self.set_monster_click_location()
 
@@ -1607,7 +1607,7 @@ class ClickerHeroes(metaclass=Singleton):
         # Sort visible heroes list by y position
         return sorted(visible_heroes, key=lambda x: x[1].y)
 
-    def get_ever_seen_heroes(self,menu_name):
+    def get_last_ascend_seen_heroes(self,menu_name):
         #
         #
         # shl=self.get_sorted_heroes_list(menu_name)
@@ -1624,9 +1624,9 @@ class ClickerHeroes(metaclass=Singleton):
         # mshi=hl.index(msh)`
 
         # return shl[:hl.index(self.get_max_seen_hero(menu_name))]
-        return self.menus[menu_name]['ever_seen_heroes']
-    def add_ever_seen_heroes(self,menu_name,hero_name):
-        self.menus[menu_name]['ever_seen_heroes'].update(hero_name)
+        return self.menus[menu_name]['last_ascend_seen_heroes']
+    def add_last_ascend_seen_heroes(self,menu_name,hero_name):
+        self.menus[menu_name]['last_ascend_seen_heroes'].update(hero_name)
 
     def get_visible_heroes(self, menu_name, number_of_vh=MAX_NUMBER_OF_VISIBLE_HEROES):
         self.open_menu(menu_name)
@@ -1724,11 +1724,12 @@ class ClickerHeroes(metaclass=Singleton):
         visible_heroes = sorted(visible_heroes, key=lambda x: x[1].y)
         if visible_heroes:
             visible_heroes_names = list(zip(*visible_heroes))[0]
-
+            self.add_last_ascend_seen_heroes(menu_name, visible_heroes_names)
 
             self.cache_visible_heroes(menu_name, visible_heroes)
         # Sort visible heroes list by y position
-        self.menus[menu_name]['ever_seen_heroes']
+
+        self.menus[menu_name]['last_ascend_seen_heroes']
         return visible_heroes
 
     def set_max_scroll_position(self, menu_name, pos):
@@ -2392,7 +2393,7 @@ class ClickerHeroes(metaclass=Singleton):
         self.window.makeScreenshotClientAreaRegion()
         menu_name = 'heroes'
         max_seen_hero = self.get_max_seen_hero(menu_name)
-        ever_seen_heroes=self.get_ever_seen_heroes(menu_name)
+        last_ascend_seen_heroes=self.get_last_ascend_seen_heroes(menu_name)
         if max_seen_hero is None:
             return None
         self.scroll_to_hero(menu_name, max_seen_hero)
@@ -2420,7 +2421,7 @@ class ClickerHeroes(metaclass=Singleton):
             return None
 
 
-        heroes_to_lvlup = [hero_name for hero_name in ever_seen_heroes if hero_name not in heroes_upgraded_list]
+        heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
 
         for hero_name in heroes_to_lvlup:
             ###Buy heroes skill except ascension
@@ -2462,11 +2463,12 @@ class ClickerHeroes(metaclass=Singleton):
                 self.window.click(x, y, cps=30)
             hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
             skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
-            heroes_upgraded_list=self.menus[menu_name]['heroes_upgraded_list']
+
             if skills_reg:
                 # heroes_upgraded_list.remove(hero_name)
+                heroes_upgraded_list = self.menus[menu_name]['heroes_upgraded_list']
                 heroes_upgraded_list.append(hero_name)
-            self.save_container(menu_name,'heroes_upgraded_list',heroes_upgraded_list)
+                self.save_container(menu_name,'heroes_upgraded_list',heroes_upgraded_list)
             self.skills_upgrades_time = time.clock()
             return True
 
