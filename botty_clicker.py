@@ -38,6 +38,7 @@ from  multiprocessing import Process
 from operator import itemgetter
 
 import cv2
+import itertools
 import numpy as np
 
 DEBUG = False
@@ -731,9 +732,6 @@ class Singleton(type):
         return cls.instance
 
 
-class Test:
-    def __init__(self):
-        self.x = 1
 
 
 class MouseClick:
@@ -1728,8 +1726,7 @@ class ClickerHeroes(metaclass=Singleton):
 
             self.cache_visible_heroes(menu_name, visible_heroes)
         # Sort visible heroes list by y position
-
-        self.menus[menu_name]['last_ascend_seen_heroes']
+        self.add_last_ascend_seen_heroes( menu_name, visible_heroes_names)
         return visible_heroes
 
     def set_max_scroll_position(self, menu_name, pos):
@@ -2417,11 +2414,13 @@ class ClickerHeroes(metaclass=Singleton):
         if sorted_hero_list is None:
             return None
         heroes_upgraded_list = self.menus[menu_name]['heroes_upgraded_list']
-        if heroes_upgraded_list is None:
-            return None
+        # if heroes_upgraded_list is None:
+        #     return None
 
 
-        heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
+        # heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
+        heroes_to_lvlup = list(itertools.takewhile(lambda x: x != max_seen_hero, sorted_hero_list))+[max_seen_hero]
+
 
         for hero_name in heroes_to_lvlup:
             ###Buy heroes skill except ascension
@@ -3031,7 +3030,7 @@ def levelup_heroes(click_lock,start_barrier):
         # ch.buy_quick_ascension()
 
         ch.lvlup_all_heroes('heroes', timer=60)
-        ch.buy_available_upgrades()
+        ch.buy_available_upgrades(upgrades_timer=30)
         ch.ascend(ascension_life=60, check_timer=30, check_progress=False)
         # except Exception as e:
         #     print("levelup_heroes:Exception:%s" % repr(e))
