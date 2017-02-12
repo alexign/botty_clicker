@@ -258,17 +258,29 @@ def find_level(image, pattern,all=False):
     return find_single_grey(image, pattern, threshold=0.96,all=all)
 
 
-def find_checked_skills(image, pattern,all=False,parts=1):
+def find_checked_skills(image, pattern,all=False,parts=3):
     image = image.get_threshold(128, 255)
     pattern = pattern.get_threshold(128, 255)
-    for sect in np.array_split(pattern,parts,axis=0):
+    topLeft=None
+    if parts==1:
+        return find_single_grey(image, pattern)
 
-        cv2.imshow("find_checked_skills:image", image.get_array())
-        cv2.imshow("find_checked_skills:pattern", pattern.get_array())
+    cv2.imshow("find_checked_skills:image", image.get_array())
+    for sect in np.array_split(pattern.get_array(),parts,axis=1):
+
+
+
+        sect_img=Image.fromArray(sect)
+        sect_reg=find_single_grey(image, sect_img)
+        cv2.imshow("find_checked_skills:pattern", sect)
         cv2.waitKey(50)
-        sect_reg=find_single_grey(image, sect, threshold=0.90)
         if not sect_reg:
             return None
+        if topLeft is None and sect_reg:
+            topLeft=sect_reg.getTopLeft()
+        bottomRight=sect_reg.getBottomRight()
+
+    return Region.from2Location(topLeft,bottomRight)
 
 
     return find_single_grey(image, pattern, threshold=0.90)
@@ -941,7 +953,8 @@ class ClickerHeroes(metaclass=Singleton):
                     find_in_func = find_single_grey_90
                 elif '_c' in nm and 'heroes_skills' in nm:
                     # find_in_func = find_checked_skills
-                    find_in_func = find_pattern_hist
+                    find_in_func = find_checked_skills
+                    # find_in_func = find_pattern_hist
 
                 else:
                     find_in_func = find_single_grey
