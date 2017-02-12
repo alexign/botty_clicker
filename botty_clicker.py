@@ -258,12 +258,19 @@ def find_level(image, pattern,all=False):
     return find_single_grey(image, pattern, threshold=0.96,all=all)
 
 
-def find_checked_skills(image, pattern,all=False):
+def find_checked_skills(image, pattern,all=False,parts=1):
     image = image.get_threshold(128, 255)
     pattern = pattern.get_threshold(128, 255)
-    cv2.imshow("find_checked_skills:image", image.get_array())
-    cv2.imshow("find_checked_skills:pattern", pattern.get_array())
-    cv2.waitKey(50)
+    for sect in np.array_split(pattern,parts,axis=0):
+
+        cv2.imshow("find_checked_skills:image", image.get_array())
+        cv2.imshow("find_checked_skills:pattern", pattern.get_array())
+        cv2.waitKey(50)
+        sect_reg=find_single_grey(image, sect, threshold=0.90)
+        if not sect_reg:
+            return None
+
+
     return find_single_grey(image, pattern, threshold=0.90)
 
 def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8,all=False):
@@ -2446,7 +2453,8 @@ class ClickerHeroes(metaclass=Singleton):
             if hero_name_reg is None:
                 continue
             hero_name_reg = hero_name_reg[0]
-            skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
+            # skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
+            skills_reg_left_x, skills_reg_left_y = button_edge_reg.getRight(),button_edge_reg.center().get_y()
             skills_reg_right_x = hero_name_reg.getRight()
             y = hero_reg.getTop() + skills_reg_left_y
             for i in range(100):
