@@ -897,8 +897,7 @@ class ClickerHeroes(metaclass=Singleton):
             self.menus[menu_name]['hero_level'] = self.load_container(menu_name, "hero_level", {})
             self.menus[menu_name]['heroes_upgraded_list'] = self.load_container(menu_name,
                                                                                       "heroes_upgraded_list",
-                                                                                      list(self.get_hero_list(
-                                                                                          menu_name)))
+                                                                                      [])
             self.menus[menu_name]['last_ascend_seen_heroes']=set()
         self.window.makeScreenshotClientAreaRegion()
         # self.set_monster_click_location()
@@ -1726,7 +1725,7 @@ class ClickerHeroes(metaclass=Singleton):
 
             self.cache_visible_heroes(menu_name, visible_heroes)
         # Sort visible heroes list by y position
-        self.add_last_ascend_seen_heroes( menu_name, visible_heroes_names)
+        # self.add_last_ascend_seen_heroes( menu_name, visible_heroes_names)
         return visible_heroes
 
     def set_max_scroll_position(self, menu_name, pos):
@@ -2419,8 +2418,10 @@ class ClickerHeroes(metaclass=Singleton):
 
 
         # heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
+        #Make list from sorted heroes list up to max_seen_hero included.
         heroes_to_lvlup = list(itertools.takewhile(lambda x: x != max_seen_hero, sorted_hero_list))+[max_seen_hero]
-
+        #Exclude from this list upgraded heroes
+        heroes_to_lvlup = [hero_name for hero_name in heroes_to_lvlup if hero_name not in heroes_upgraded_list]
 
         for hero_name in heroes_to_lvlup:
             ###Buy heroes skill except ascension
@@ -2469,7 +2470,7 @@ class ClickerHeroes(metaclass=Singleton):
                 heroes_upgraded_list.append(hero_name)
                 self.save_container(menu_name,'heroes_upgraded_list',heroes_upgraded_list)
             self.skills_upgrades_time = time.clock()
-            return True
+        return True
 
     def buy_quick_ascension(self):
         self.window.makeScreenshotClientAreaRegion()
