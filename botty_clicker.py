@@ -259,8 +259,8 @@ def find_level(image, pattern,all=False):
 
 
 def find_checked_skills(image, pattern,all=False,parts=3):
-    image = image.get_threshold(128, 255)
-    pattern = pattern.get_threshold(128, 255)
+    # image = image.get_threshold(128, 255)
+    # pattern = pattern.get_threshold(128, 255)
     topLeft=None
     if parts==1:
         return find_single_grey(image, pattern)
@@ -276,6 +276,7 @@ def find_checked_skills(image, pattern,all=False,parts=3):
         cv2.waitKey(50)
         if not sect_reg:
             return None
+        sect_reg=sect_reg[0]
         if topLeft is None and sect_reg:
             topLeft=sect_reg.getTopLeft()
         bottomRight=sect_reg.getBottomRight()
@@ -2439,7 +2440,8 @@ class ClickerHeroes(metaclass=Singleton):
 
         # heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
         #Make list from sorted heroes list up to max_seen_hero included.
-        heroes_to_lvlup = list(itertools.takewhile(lambda x: x != max_seen_hero, sorted_hero_list))+[max_seen_hero]
+        # heroes_to_lvlup = list(itertools.takewhile(lambda x: x != max_seen_hero, sorted_hero_list))+[max_seen_hero]
+        heroes_to_lvlup = list(itertools.takewhile(lambda x: x not in self.get_next_hero_name(max_seen_hero), sorted_hero_list))
         #Exclude from this list upgraded heroes
         heroes_to_lvlup = [hero_name for hero_name in heroes_to_lvlup if hero_name not in heroes_upgraded_list]
 
