@@ -277,10 +277,10 @@ def find_checked_skills(image, pattern,all=False,parts=4):
             topLeft=sect_reg.getTopLeft()
         bottomRight=sect_reg.getBottomRight()
 
-    return Region.from2Location(topLeft,bottomRight)
+    return [Region.from2Location(topLeft,bottomRight)]
 
 
-    return find_single_grey(image, pattern, threshold=0.90)
+    # return find_single_grey(image, pattern, threshold=0.90)
 
 def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8,all=False):
     pattern_height, pattern_width = pattern.getSize()
@@ -949,7 +949,7 @@ class ClickerHeroes(metaclass=Singleton):
                 elif 'button_progression' in nm:
                     find_in_func = find_single_grey_90
                 # elif '_c' in nm and 'heroes_skills' in nm:
-                elif any (x in nm for x in ['_c', 'heroes_skills']):
+                elif all (x in nm for x in ['_c', 'heroes_skills']):
                     find_in_func = find_checked_skills
                     # find_in_func = find_pattern_hist
 
@@ -2279,6 +2279,8 @@ class ClickerHeroes(metaclass=Singleton):
         progress_on = self.find_pattern_from_list(self.get_pattern('main', 'button_progression_on'))
 
         if progress_on and self.stuck_on_boss(boss_time=boss_timer, check_interval=1):
+            if self.try_skill_combos('869', '123457','123'):
+                time.sleep(30)
             self.prev_level()
             self.farm_mode_start_time = curr_time
             self.click_pattern('main', 'button_progression_off')
@@ -2350,6 +2352,8 @@ class ClickerHeroes(metaclass=Singleton):
             self.next_level()
 
         if not self.farm_mode_start_time and self.stuck_on_boss(boss_time=boss_timer, check_interval=1):
+            if self.try_skill_combos('869', '123457','123'):
+                time.sleep(30)
             self.prev_level()
             self.farm_mode_start_time = curr_time
             return True
@@ -3068,7 +3072,7 @@ def progress_levels(click_lock,start_barrier):
 
         ch.progress_level(farm_mode_timer=300, boss_timer=30)
         # ch.try_skill_combos('12345')
-        ch.try_skill_combos('869', '123457')
+        # ch.try_skill_combos('869', '123457','123')
         # except Exception as e:
         #     print("progress_levels:Exception:%s" % repr(e))
         #     continue
