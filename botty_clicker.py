@@ -2441,7 +2441,7 @@ class ClickerHeroes(metaclass=Singleton):
         # heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
         #Make list from sorted heroes list up to max_seen_hero included.
         # heroes_to_lvlup = list(itertools.takewhile(lambda x: x != max_seen_hero, sorted_hero_list))+[max_seen_hero]
-        heroes_to_lvlup = list(itertools.takewhile(lambda x: x not in self.get_next_hero_name(max_seen_hero), sorted_hero_list))
+        heroes_to_lvlup = list(itertools.takewhile(lambda x: x not in self.get_next_hero_name(menu_name,max_seen_hero), sorted_hero_list))
         #Exclude from this list upgraded heroes
         heroes_to_lvlup = [hero_name for hero_name in heroes_to_lvlup if hero_name not in heroes_upgraded_list]
 
