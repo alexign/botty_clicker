@@ -1962,8 +1962,8 @@ class ClickerHeroes(metaclass=Singleton):
 
     def scroll_menu(self, menu_name, direction, count=1):
         self.open_menu(menu_name)
-        if not self.find_pattern_from_list(self.get_pattern('main', 'scroll_')):
-            return None
+        # if not self.find_pattern_from_list(self.get_pattern('main', 'scroll_')):
+        #     return None
         for i in range(count):
             # mouse_event = MouseScroll(self.window, direction)
             # self.mouse_event_queue.put((mouse_event, self.mp_event))
@@ -2298,6 +2298,22 @@ class ClickerHeroes(metaclass=Singleton):
             self.click_pattern('main', 'button_progression_off')
             return True
 
+    def progress_manual(self, farm_mode_timer=300, boss_timer=10):
+        curr_time = time.clock()
+        if self.farm_mode_start_time and curr_time - self.farm_mode_start_time > farm_mode_timer:
+            self.farm_mode_start_time = None
+            # return False
+        if not self.farm_mode_start_time:
+            self.next_level()
+
+        if not self.farm_mode_start_time and self.stuck_on_boss(boss_time=boss_timer, check_interval=1):
+            if self.try_skill_combos('869', '123457','123'):
+                time.sleep(30)
+            self.prev_level()
+            self.farm_mode_start_time = curr_time
+            return True
+        return False
+
     def stuck_on_boss(self, boss_time, check_interval=5):
         curr_time = time.clock()
 
@@ -2343,21 +2359,7 @@ class ClickerHeroes(metaclass=Singleton):
                 return True
         return False
 
-    def progress_manual(self, farm_mode_timer=300, boss_timer=10):
-        curr_time = time.clock()
-        if self.farm_mode_start_time and curr_time - self.farm_mode_start_time > farm_mode_timer:
-            self.farm_mode_start_time = None
-            # return False
-        if not self.farm_mode_start_time:
-            self.next_level()
 
-        if not self.farm_mode_start_time and self.stuck_on_boss(boss_time=boss_timer, check_interval=1):
-            if self.try_skill_combos('869', '123457','123'):
-                time.sleep(30)
-            self.prev_level()
-            self.farm_mode_start_time = curr_time
-            return True
-        return False
 
     def progress_level(self, farm_mode_timer=300, boss_timer=30, progress_button_timer=30):
         self.window.makeScreenshotClientAreaRegion()
@@ -2543,6 +2545,8 @@ class ClickerHeroes(metaclass=Singleton):
                 if DEBUG:
                     print("try_skill_combos: Combo %s is ready to activate" % combo)
                 self.window.pressKeyList(combo)
+                return True
+        return False
 
     def start_play(self):
         if self.click_pattern('buttons','button_play'):
