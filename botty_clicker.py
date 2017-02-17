@@ -1418,11 +1418,14 @@ class ClickerHeroes(metaclass=Singleton):
         time_1 = time.clock()
         start_time = time.clock()
         cnt = 0
-        hold_key = 'shift'
-        if max_level is None:
-            hold_key = 'q'
 
-        self.window.pressAndHoldKey(hold_key)
+
+        # hold_key = 'shift'
+        # if max_level is None:
+        #     hold_key = 'q'
+        # self.window.pressAndHoldKey(hold_key)
+
+
         while True:
             # time.sleep(0.2)
             # if menu_name == 'heroes':
@@ -1473,11 +1476,13 @@ class ClickerHeroes(metaclass=Singleton):
 
             if total_delay > 1 and check_reg == level_reg:
                 break
-            cnt += 10
+            # cnt += 10
+            cnt += 1
             if time.clock() - start_time > 120 or cnt >= lvl_count:
                 break
 
-        self.window.releaseKey(hold_key)
+        # self.window.releaseKey(hold_key)
+
         # self.window.move_mouse(y=10)
         time.sleep(0.5)
         time_2 = time.clock()
@@ -3057,9 +3062,9 @@ def levelup_heroes(click_lock,start_barrier):
         ch.lvlup_top_heroes('heroes')
         # ch.buy_quick_ascension()
 
-        ch.lvlup_all_heroes('heroes', timer=60)
-        ch.buy_available_upgrades(upgrades_timer=30)
-        ch.ascend(ascension_life=60, check_timer=30, check_progress=False)
+        ch.lvlup_all_heroes('heroes', timer=300)
+        ch.buy_available_upgrades(upgrades_timer=300)
+        ch.ascend(ascension_life=7200, check_timer=30, check_progress=False)
         # except Exception as e:
         #     print("levelup_heroes:Exception:%s" % repr(e))
         #     continue
