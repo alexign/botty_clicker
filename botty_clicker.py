@@ -43,7 +43,7 @@ import numpy as np
 
 DEBUG = False
 STATS_DIR = 'stats'
-PATTERNS_DIR='patterns'
+PATTERNS_DIR = 'patterns'
 FARMING_INTERVAL = 30
 PROGRESSION_INTERVAL = 30
 FISHING_INTERVAL = 30
@@ -222,7 +222,7 @@ def find_single_grey_old(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=
     return [Region(top_left[0], top_left[1], width_pattern, height_pattern)]
 
 
-def find_lvlup(image, pattern,all=False):
+def find_lvlup(image, pattern, all=False):
     t_min = 128
     t_max = 255
     reg = find_single_grey(image, pattern)
@@ -237,52 +237,53 @@ def find_lvlup(image, pattern,all=False):
 
 
 def find_progress_button(image, pattern):
-    return find_single_grey(image, pattern, threshold=0.9,all=all)
+    return find_single_grey(image, pattern, threshold=0.9, all=all)
 
 
-def find_single_grey_90(image, pattern,all=False):
-    return find_single_grey(image, pattern, threshold=0.9,all=all)
+def find_single_grey_90(image, pattern, all=False):
+    return find_single_grey(image, pattern, threshold=0.9, all=all)
 
 
-def find_single_grey_95(image, pattern,all=False):
-    return find_single_grey(image, pattern, threshold=0.95,all=all)
+def find_single_grey_95(image, pattern, all=False):
+    return find_single_grey(image, pattern, threshold=0.95, all=all)
 
 
-def find_single_grey_97(image, pattern,all=False):
-    return find_single_grey(image, pattern, threshold=0.97,all=all)
+def find_single_grey_97(image, pattern, all=False):
+    return find_single_grey(image, pattern, threshold=0.97, all=all)
 
 
-def find_level(image, pattern,all=False):
+def find_level(image, pattern, all=False):
     image = image.get_threshold(235, 255)
     pattern = pattern.get_threshold(235, 255)
-    return find_single_grey(image, pattern, threshold=0.96,all=all)
+    return find_single_grey(image, pattern, threshold=0.96, all=all)
 
 
-def find_checked_skills(image, pattern,all=False,parts=4):
+def find_checked_skills(image, pattern, all=False, parts=4):
     # image = image.get_threshold(128, 255)
     # pattern = pattern.get_threshold(128, 255)
-    topLeft=None
-    if parts==1:
+    topLeft = None
+    if parts == 1:
         return find_single_grey(image, pattern)
     cv2.imshow("find_checked_skills:image", image.get_array())
-    for sect in np.array_split(pattern.get_array(),parts,axis=1):
-        sect_img=Image.fromArray(sect)
-        sect_reg=find_single_grey(image, sect_img)
+    for sect in np.array_split(pattern.get_array(), parts, axis=1):
+        sect_img = Image.fromArray(sect)
+        sect_reg = find_single_grey(image, sect_img)
         cv2.imshow("find_checked_skills:pattern", sect)
         cv2.waitKey(50)
         if not sect_reg:
             return None
-        sect_reg=sect_reg[0]
+        sect_reg = sect_reg[0]
         if topLeft is None and sect_reg:
-            topLeft=sect_reg.getTopLeft()
-        bottomRight=sect_reg.getBottomRight()
+            topLeft = sect_reg.getTopLeft()
+        bottomRight = sect_reg.getBottomRight()
 
-    return [Region.from2Location(topLeft,bottomRight)]
+    return [Region.from2Location(topLeft, bottomRight)]
 
 
     # return find_single_grey(image, pattern, threshold=0.90)
 
-def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8,all=False):
+
+def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8, all=False):
     pattern_height, pattern_width = pattern.getSize()
     height_image, width_image = image.getSize()
 
@@ -295,7 +296,7 @@ def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8,
     if all:
         image_grey = image_grey.copy()
 
-    regions=[]
+    regions = []
     while 1:
         try:
             res = cv2.matchTemplate(image_grey, pattern_grey, method)
@@ -325,6 +326,8 @@ def find_single_grey(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8,
                       cv2.FILLED)
     # return [Region(top_left[0], top_left[1], pattern_width, pattern_height)]
     return regions
+
+
 def find_all_grey_old(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8):
     height, width = pattern.getSize()
     # pimage = pattern.get_canny_array()
@@ -376,10 +379,10 @@ def find_all_grey_old(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8
     return regRet
 
 
-def find_pattern_hist(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8, corr_coeff=0.9,all=False):
+def find_pattern_hist(image, pattern, method=cv2.TM_CCOEFF_NORMED, threshold=0.8, corr_coeff=0.9, all=False):
     pattern_grey = pattern.get_grey()
     image_grey = image.get_grey()
-    reg_list = find_single_grey(image_grey, pattern_grey, method=method, threshold=threshold,all=all)
+    reg_list = find_single_grey(image_grey, pattern_grey, method=method, threshold=threshold, all=all)
     print('find_pattern_hist: reg_list %s' % (reg_list))
     pattern_region = None
     if reg_list:
@@ -700,9 +703,9 @@ class Image:
                 break
         return reg
 
-    def find_pattern(self, pattern,all=False):
+    def find_pattern(self, pattern, all=False):
 
-        return pattern.pattern_finder(self, pattern,all=all)
+        return pattern.pattern_finder(self, pattern, all=all)
 
         # Search for all occurence of pattern in source image
 
@@ -746,8 +749,6 @@ class Singleton(type):
         if not cls.instance:
             cls.instance = super(Singleton, cls).__call__(*args, **kw)
         return cls.instance
-
-
 
 
 class MouseClick:
@@ -892,10 +893,10 @@ class ClickerHeroes(metaclass=Singleton):
             scale = height / (1600.0 * 9 / 16)
         if height > width * 9.0 / 16:
             scale = width / 1600.0
-        self.script_path=os.path.realpath(__file__)
-        self.script_dir=os.path.dirname(self.script_path)
-        self.stats_dir=os.path.join(self.script_dir,STATS_DIR)
-        self.patterns_path=os.path.join(self.script_dir,PATTERNS_DIR)
+        self.script_path = os.path.realpath(__file__)
+        self.script_dir = os.path.dirname(self.script_path)
+        self.stats_dir = os.path.join(self.script_dir, STATS_DIR)
+        self.patterns_path = os.path.join(self.script_dir, PATTERNS_DIR)
         self.load_patterns(self.patterns_path, self.patterns, scale)
         self.hero_patterns_location_cache = {}
         for menu_name in ('heroes', 'ancients'):
@@ -912,9 +913,9 @@ class ClickerHeroes(metaclass=Singleton):
             # self.menus[menu_name]['hero_level'] = self.load_heroes_levels(menu_name)
             self.menus[menu_name]['hero_level'] = self.load_container(menu_name, "hero_level", {})
             self.menus[menu_name]['heroes_upgraded_list'] = self.load_container(menu_name,
-                                                                                      "heroes_upgraded_list",
-                                                                                      [])
-            self.menus[menu_name]['last_ascend_seen_heroes']=set()
+                                                                                "heroes_upgraded_list",
+                                                                                [])
+            self.menus[menu_name]['last_ascend_seen_heroes'] = set()
         self.window.makeScreenshotClientAreaRegion()
         # self.set_monster_click_location()
 
@@ -949,7 +950,7 @@ class ClickerHeroes(metaclass=Singleton):
                 elif 'button_progression' in nm:
                     find_in_func = find_single_grey_90
                 # elif '_c' in nm and 'heroes_skills' in nm:
-                elif all (x in nm for x in ['_c', 'heroes_skills']):
+                elif all(x in nm for x in ['_c', 'heroes_skills']):
                     find_in_func = find_checked_skills
                     # find_in_func = find_pattern_hist
 
@@ -964,13 +965,13 @@ class ClickerHeroes(metaclass=Singleton):
     def find_pattern(self, pat):
         return self.find_pattern_cached(pat)
 
-    def find_pattern_from_list(self, pat_list, cache=True,all=False):
+    def find_pattern_from_list(self, pat_list, cache=True, all=False):
         regions = []
         for pat in pat_list:
             if cache:
-                reg = self.find_pattern_cached(pat,all=all)
+                reg = self.find_pattern_cached(pat, all=all)
             else:
-                reg = self.window.getScreenshot().find_pattern(pat,all=all)
+                reg = self.window.getScreenshot().find_pattern(pat, all=all)
 
             if reg:
                 regions.extend(reg)
@@ -1000,7 +1001,7 @@ class ClickerHeroes(metaclass=Singleton):
         #     return None
         return reg_name
 
-    def find_pattern_cached(self, pat,all=False):
+    def find_pattern_cached(self, pat, all=False):
         # pat_id = id(pat)
 
         pat_id = pat.get_name()
@@ -1014,7 +1015,7 @@ class ClickerHeroes(metaclass=Singleton):
             # Quickly scan pattern location cache
             cnt = 0
             for cached_location in plc.keys():
-                reg = self.window.getScreenshot(cached_location).find_pattern(pat,all=False)
+                reg = self.window.getScreenshot(cached_location).find_pattern(pat, all=False)
                 cnt += 1
                 # If location exist in cache and pattern is on screen add location to retrun
                 if reg:
@@ -1029,7 +1030,7 @@ class ClickerHeroes(metaclass=Singleton):
         if not regions:
             # Scan the whole screen
             # print("find_pattern_cached: Cache missed!! Searching for %s " % (pat.get_name()))
-            reg = self.window.getScreenshot().find_pattern(pat,all=all)
+            reg = self.window.getScreenshot().find_pattern(pat, all=all)
 
             # print("find_pattern_cached: Found reg %s " % (reg))
             # If location found add it to cache and
@@ -1128,55 +1129,56 @@ class ClickerHeroes(metaclass=Singleton):
             last_available_hero_index = sorted_hero_list.index(last_available_hero)
         else:
             return None
-
+        heroes_upgraded_list = self.menus[menu_name]['heroes_upgraded_list']
         heroes_to_lvlup = [hero_name for hero_name in sorted_hero_list if
-                           self.get_hero_level(menu_name, hero_name) < max_level and sorted_hero_list.index(
-                               hero_name) <= last_available_hero_index]
+                           self.get_hero_level(menu_name, hero_name) < max_level
+                           and sorted_hero_list.index(hero_name) <= last_available_hero_index
+                           and hero_name not in heroes_upgraded_list]
 
         for hero_name in heroes_to_lvlup:
             self.lvlup_hero(menu_name, hero_name, max_level=max_level)
-        return
-            ###Buy heroes skill except ascension
-            # hero_reg = self.scroll_to_hero(menu_name, hero_name)
-            # hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
-            # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
-            # if skills_reg:
-            #     continue
-            #
-            # if hero_name == 'amenhotep':
-            #     ascend_skill_reg = hero_reg_scr.find_pattern_from_list(
-            #         self.get_pattern('heroes_skills', 'amenhotep_ascend'),
-            #         cache=False)
-            #     if ascend_skill_reg:
-            #         ascend_skill_reg = ascend_skill_reg[0]
-            #     else:
-            #         continue
-            # else:
-            #     ascend_skill_reg = None
-            # button_edge_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_button', 'edge_'),
-            #                                                       cache=False)
-            # if button_edge_reg is None:
-            #     continue
-            # button_edge_reg = button_edge_reg[0]
-            # hero_name_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern(menu_name, hero_name))
-            # if hero_name_reg is None:
-            #     continue
-            # hero_name_reg = hero_name_reg[0]
-            # skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
-            # skills_reg_right_x = hero_name_reg.getRight()
-            # y = hero_reg.getTop() + skills_reg_left_y
-            # for i in range(100):
-            #     x = hero_reg.getLeft() + skills_reg_left_x + int(
-            #         random.random() * (skills_reg_right_x - skills_reg_left_x))
-            #     if ascend_skill_reg and ascend_skill_reg.contains((x - hero_reg.getLeft(), y - hero_reg.getTop())):
-            #         continue
-            #     hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
-            #     cv2.imshow("hero_reg_scr", hero_reg_scr.get_array())
-            #     cv2.waitKey(50)
-            #     # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
-            #     # if skills_reg:
-            #     #     break
-            #     self.window.click(x, y, cps=5)
+        return True
+        ###Buy heroes skill except ascension
+        # hero_reg = self.scroll_to_hero(menu_name, hero_name)
+        # hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
+        # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
+        # if skills_reg:
+        #     continue
+        #
+        # if hero_name == 'amenhotep':
+        #     ascend_skill_reg = hero_reg_scr.find_pattern_from_list(
+        #         self.get_pattern('heroes_skills', 'amenhotep_ascend'),
+        #         cache=False)
+        #     if ascend_skill_reg:
+        #         ascend_skill_reg = ascend_skill_reg[0]
+        #     else:
+        #         continue
+        # else:
+        #     ascend_skill_reg = None
+        # button_edge_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_button', 'edge_'),
+        #                                                       cache=False)
+        # if button_edge_reg is None:
+        #     continue
+        # button_edge_reg = button_edge_reg[0]
+        # hero_name_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern(menu_name, hero_name))
+        # if hero_name_reg is None:
+        #     continue
+        # hero_name_reg = hero_name_reg[0]
+        # skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
+        # skills_reg_right_x = hero_name_reg.getRight()
+        # y = hero_reg.getTop() + skills_reg_left_y
+        # for i in range(100):
+        #     x = hero_reg.getLeft() + skills_reg_left_x + int(
+        #         random.random() * (skills_reg_right_x - skills_reg_left_x))
+        #     if ascend_skill_reg and ascend_skill_reg.contains((x - hero_reg.getLeft(), y - hero_reg.getTop())):
+        #         continue
+        #     hero_reg_scr = self.window.makeScreenshotClientAreaRegion(hero_reg)
+        #     cv2.imshow("hero_reg_scr", hero_reg_scr.get_array())
+        #     cv2.waitKey(50)
+        #     # skills_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_skills', '%s_c' % hero_name))
+        #     # if skills_reg:
+        #     #     break
+        #     self.window.click(x, y, cps=5)
 
     def lvlup_top_heroes(self, menu_name, dist=0):
         self.window.makeScreenshotClientAreaRegion()
@@ -1332,7 +1334,7 @@ class ClickerHeroes(metaclass=Singleton):
 
     def save_sorted_heroes_list(self, menu_name, shl):
         try:
-            shl_filename = os.path.join(self.stats_dir,'%s_sorted_heroes_list.dat' % menu_name)
+            shl_filename = os.path.join(self.stats_dir, '%s_sorted_heroes_list.dat' % menu_name)
             with tempfile.NamedTemporaryFile(mode='w+t', delete=False, dir=STATS_DIR) as temp_file:
                 json.dump(shl, temp_file)
             if os.path.isfile(shl_filename):
@@ -1418,7 +1420,6 @@ class ClickerHeroes(metaclass=Singleton):
         time_1 = time.clock()
         start_time = time.clock()
         cnt = 0
-
 
         # hold_key = 'shift'
         # if max_level is None:
@@ -1508,9 +1509,7 @@ class ClickerHeroes(metaclass=Singleton):
         # # self.mouse_event_queue.put('123123123')
         # self.mp_event.wait()
 
-        return  self.window.click_location(loc, refresh=refresh)
-
-
+        return self.window.click_location(loc, refresh=refresh)
 
     def click_region(self, reg, refresh=False):
 
@@ -1626,7 +1625,7 @@ class ClickerHeroes(metaclass=Singleton):
         # Sort visible heroes list by y position
         return sorted(visible_heroes, key=lambda x: x[1].y)
 
-    def get_last_ascend_seen_heroes(self,menu_name):
+    def get_last_ascend_seen_heroes(self, menu_name):
         #
         #
         # shl=self.get_sorted_heroes_list(menu_name)
@@ -1644,7 +1643,8 @@ class ClickerHeroes(metaclass=Singleton):
 
         # return shl[:hl.index(self.get_max_seen_hero(menu_name))]
         return self.menus[menu_name]['last_ascend_seen_heroes']
-    def add_last_ascend_seen_heroes(self,menu_name,hero_name):
+
+    def add_last_ascend_seen_heroes(self, menu_name, hero_name):
         self.menus[menu_name]['last_ascend_seen_heroes'].update(hero_name)
 
     def get_visible_heroes(self, menu_name, number_of_vh=MAX_NUMBER_OF_VISIBLE_HEROES):
@@ -2030,7 +2030,7 @@ class ClickerHeroes(metaclass=Singleton):
         if DEBUG:
             print('open_menu: menu name is %s ' % (cur_menu))
         if cur_menu == menu_name:
-           return
+            return
         self.close_menu(wait=None)
         pat_list = self.get_pattern('main', menu_name + '_menu')
         reg = self.find_pattern_from_list(pat_list)
@@ -2041,15 +2041,15 @@ class ClickerHeroes(metaclass=Singleton):
     def getCurrentMenu(self):
         return self.currentmenu_name
 
-    def close_menu(self, menu_name=None,wait=1):
+    def close_menu(self, menu_name=None, wait=1):
         # self.wait_for_pattern_name(menu_name, 'close_menu')
         while 1:
-            self.wait_for_pattern_list(self.get_pattern('buttons', 'button_close_menu'),wait=wait)
+            self.wait_for_pattern_list(self.get_pattern('buttons', 'button_close_menu'), wait=wait)
             if not self.click_pattern('buttons', 'button_close_menu', all=True):
                 break
 
 
-        # self.click_pattern(menu_name, 'close_menu', all=False)
+                # self.click_pattern(menu_name, 'close_menu', all=False)
 
     def close_popups(self, menu_name):
         self.wait_for_pattern_name(menu_name, 'close_menu')
@@ -2064,9 +2064,9 @@ class ClickerHeroes(metaclass=Singleton):
         wait_start = time.clock()
         total_delay = 0
 
-        while wait is None or wait==-1 or total_delay <= wait:
+        while wait is None or wait == -1 or total_delay <= wait:
             self.window.makeScreenshotClientAreaRegion()
-            reg=self.find_pattern_from_list(pat_list)
+            reg = self.find_pattern_from_list(pat_list)
             if reg:
                 return reg
             if wait is None:
@@ -2083,7 +2083,7 @@ class ClickerHeroes(metaclass=Singleton):
             self.window.makeScreenshotClientAreaRegion()
         patt_list = self.get_pattern(menu_name, pattern_name)
         if patt_list:
-            regs = self.find_pattern_from_list(patt_list,all=all)
+            regs = self.find_pattern_from_list(patt_list, all=all)
             if regs:
                 for reg in regs:
                     self.click_region(reg)
@@ -2122,9 +2122,9 @@ class ClickerHeroes(metaclass=Singleton):
             self.click_monster_location = Location(click_x, click_y)
         return self.click_monster_location
 
-    # def get_monster_click_location(self):
-    #     if self.click_monster_location is None:
-    #         self.set_monster_click_location()
+        # def get_monster_click_location(self):
+        #     if self.click_monster_location is None:
+        #         self.set_monster_click_location()
 
         return self.click_monster_location
 
@@ -2284,7 +2284,7 @@ class ClickerHeroes(metaclass=Singleton):
         progress_on = self.find_pattern_from_list(self.get_pattern('main', 'button_progression_on'))
 
         if progress_on and self.stuck_on_boss(boss_time=boss_timer, check_interval=1):
-            if self.try_skill_combos('869', '123457','123'):
+            if self.try_skill_combos('869', '123457', '123'):
                 time.sleep(30)
             self.prev_level()
             self.farm_mode_start_time = curr_time
@@ -2312,7 +2312,7 @@ class ClickerHeroes(metaclass=Singleton):
             self.next_level()
 
         if not self.farm_mode_start_time and self.stuck_on_boss(boss_time=boss_timer, check_interval=1):
-            if self.try_skill_combos('869', '123457','123'):
+            if self.try_skill_combos('869', '123457', '123'):
                 time.sleep(30)
             self.prev_level()
             self.farm_mode_start_time = curr_time
@@ -2363,8 +2363,6 @@ class ClickerHeroes(metaclass=Singleton):
                 # cv2.waitKey(50)
                 return True
         return False
-
-
 
     def progress_level(self, farm_mode_timer=300, boss_timer=30, progress_button_timer=30):
         self.window.makeScreenshotClientAreaRegion()
@@ -2434,8 +2432,6 @@ class ClickerHeroes(metaclass=Singleton):
 
         self.window.makeScreenshotClientAreaRegion()
 
-
-
         sorted_hero_list = self.get_sorted_heroes_list(menu_name)
         if sorted_hero_list is None:
             return None
@@ -2445,10 +2441,11 @@ class ClickerHeroes(metaclass=Singleton):
 
 
         # heroes_to_lvlup = [hero_name for hero_name in last_ascend_seen_heroes if hero_name not in heroes_upgraded_list]
-        #Make list from sorted heroes list up to max_seen_hero included.
+        # Make list from sorted heroes list up to max_seen_hero included.
         # heroes_to_lvlup = list(itertools.takewhile(lambda x: x != max_seen_hero, sorted_hero_list))+[max_seen_hero]
-        heroes_to_lvlup = list(itertools.takewhile(lambda x: x not in self.get_next_hero_name(menu_name,max_seen_hero), sorted_hero_list))
-        #Exclude from this list upgraded heroes
+        heroes_to_lvlup = list(
+            itertools.takewhile(lambda x: x not in self.get_next_hero_name(menu_name, max_seen_hero), sorted_hero_list))
+        # Exclude from this list upgraded heroes
         heroes_to_lvlup = [hero_name for hero_name in heroes_to_lvlup if hero_name not in heroes_upgraded_list]
 
         for hero_name in heroes_to_lvlup:
@@ -2464,10 +2461,9 @@ class ClickerHeroes(metaclass=Singleton):
                 if ascend_skill_reg:
                     ascend_skill_reg = ascend_skill_reg[0]
 
-
             button_edge_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_button', 'edge_'),
                                                                   cache=False)
-            if not button_edge_reg :
+            if not button_edge_reg:
                 continue
             button_edge_reg = button_edge_reg[0]
             hero_name_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern(menu_name, hero_name))
@@ -2475,7 +2471,7 @@ class ClickerHeroes(metaclass=Singleton):
                 continue
             hero_name_reg = hero_name_reg[0]
             # skills_reg_left_x, skills_reg_left_y = button_edge_reg.center().get_xy()
-            skills_reg_left_x, skills_reg_left_y = button_edge_reg.getRight(),button_edge_reg.center().get_y()
+            skills_reg_left_x, skills_reg_left_y = button_edge_reg.getRight(), button_edge_reg.center().get_y()
             skills_reg_right_x = hero_name_reg.getRight()
             y = hero_reg.getTop() + skills_reg_left_y
             for i in range(100):
@@ -2497,7 +2493,7 @@ class ClickerHeroes(metaclass=Singleton):
                 # heroes_upgraded_list.remove(hero_name)
                 heroes_upgraded_list = self.menus[menu_name]['heroes_upgraded_list']
                 heroes_upgraded_list.append(hero_name)
-                self.save_container(menu_name,'heroes_upgraded_list',heroes_upgraded_list)
+                self.save_container(menu_name, 'heroes_upgraded_list', heroes_upgraded_list)
             self.skills_upgrades_time = time.clock()
         return True
 
@@ -2511,7 +2507,7 @@ class ClickerHeroes(metaclass=Singleton):
                     if self.wait_for_pattern_list(self.get_pattern('shop', 'buy_confirm')):
                         self.click_pattern('shop', 'button_yes')
                         if self.wait_for_pattern_list(self.get_pattern('shop', 'title_thank_you')):
-                            #Close all shop submenu
+                            # Close all shop submenu
                             self.click_pattern('shop', 'button_close_menu', all=True)
                             # self.click_pattern('shop', 'button_okey')
                             # if self.wait_for_pattern_list(self.get_pattern('shop', 'shop_title')):
@@ -2553,10 +2549,11 @@ class ClickerHeroes(metaclass=Singleton):
         return False
 
     def start_play(self):
-        if self.click_pattern('buttons','button_play'):
-            if self.click_pattern('buttons', 'button_close_menu',all=True):
+        if self.click_pattern('buttons', 'button_play'):
+            if self.click_pattern('buttons', 'button_close_menu', all=True):
                 return True
         return None
+
 
 class Window:
     def __init__(self, hwnd, lock):
@@ -2754,6 +2751,7 @@ class Window:
                           bmpScreen.bmHeight,
                           ctypes.c_void_p(img.ctypes.data),
                           ctypes.byref(bi), DIB_RGB_COLORS) == 0):
+                print ("makeScreenshotClientAreaRegion: GetDIBits = 0 ")
                 return None
         DeleteDC(myDC)
         DeleteObject(myBitMap)
@@ -2768,17 +2766,17 @@ class Window:
         with self.lock:
             tmp = (y << 16) | x
             time1 = time.clock()
-            err=0
-            err+=SendMessage(self.hwnd, WM_MOUSEWHEEL,
-                        (WHEEL_DELTA * direction) << 16, tmp)
+            err = 0
+            err += SendMessage(self.hwnd, WM_MOUSEWHEEL,
+                               (WHEEL_DELTA * direction) << 16, tmp)
             time.sleep(0.02)
             x = 1
             y = 1
             tmp = (y << 16) | x
-            err +=SendMessage(self.hwnd, WM_MOUSEMOVE, 0, tmp)
+            err += SendMessage(self.hwnd, WM_MOUSEMOVE, 0, tmp)
             time2 = time.clock()
-            if time2-time1>1 or err >0:
-                print("scroll: got delay > 1 sec %s err %" % (time2-time1,err))
+            if time2 - time1 > 1 or err > 0:
+                print("scroll: got delay > 1 sec %s err %s" % (time2 - time1, err))
 
     def scrollDown(self):
         self.scrollDown(1, 1)
@@ -2809,12 +2807,12 @@ class Window:
 
         with self.lock:
             err = 0
-            time1=time.clock()
+            time1 = time.clock()
             err += SendMessage(self.hwnd, WM_LBUTTONDOWN, 0, tmp)
             err += SendMessage(self.hwnd, WM_LBUTTONUP, 0, tmp)
-            time2=time.clock()
+            time2 = time.clock()
             if time2 - time1 > 1 or err > 0:
-                print("scroll: got delay > 1 sec %s err %" % (time2 - time1, err))
+                print("scroll: got delay > 1 sec %s err %s" % (time2 - time1, err))
 
             time.sleep(delay)
             if park:
@@ -3058,13 +3056,22 @@ def get_collectables(click_lock, start_barrier):
         #     continue
 
 
-def levelup_heroes(click_lock,start_barrier):
+def levelup_heroes(click_lock, start_barrier):
     start_barrier.wait()
     print("levelup_heroes: Started")
     ch = ClickerHeroes(click_lock)
+    i=0
     while True:
         # try:
+        # i+=1
+        # time1=time.clock()
         # ch.window.makeScreenshotClientAreaRegion()
+        # cv2.imshow('Test screenshot', ch.window.getScreenshot().get_array())
+        # cv2.waitKey(10)
+        # time.sleep(10)
+        # time2 = time.clock()
+        # print("%d time2-time1= %s" % (i,time2-time1))
+
         # ch.buy_quick_ascension()
         ch.reindex_heroes_list('heroes')
         #     if ch.lvlup_all_heroes('heroes', max_level=150, timer=600):
@@ -3072,15 +3079,15 @@ def levelup_heroes(click_lock,start_barrier):
         ch.lvlup_top_heroes('heroes')
         # ch.buy_quick_ascension()
 
-        ch.lvlup_all_heroes('heroes', timer=600)
-        ch.buy_available_upgrades(upgrades_timer=600)
-        ch.ascend(ascension_life=7200, check_timer=30, check_progress=False)
+        # ch.lvlup_all_heroes('heroes', timer=1800)
+        # ch.buy_available_upgrades(upgrades_timer=1800)
+        # ch.ascend(ascension_life=7200, check_timer=30, check_progress=False)
         # except Exception as e:
         #     print("levelup_heroes:Exception:%s" % repr(e))
         #     continue
 
 
-def progress_levels(click_lock,start_barrier):
+def progress_levels(click_lock, start_barrier):
     start_barrier.wait()
     print("progress_levels: Started")
     ch = ClickerHeroes(click_lock)
@@ -3089,7 +3096,7 @@ def progress_levels(click_lock,start_barrier):
         # img = ch.window.getScreenshot().get_canny_array()
         # cv2.imshow('Clicker Heroes', img)
 
-        ch.progress_level(farm_mode_timer=300, boss_timer=30)
+        ch.progress_level(farm_mode_timer=180, boss_timer=30)
         # ch.try_skill_combos('12345')
         # ch.try_skill_combos('869', '123457','123')
         # except Exception as e:
@@ -3097,16 +3104,16 @@ def progress_levels(click_lock,start_barrier):
         #     continue
 
 
-
 if __name__ == '__main__':
     c_lock = multiprocessing.RLock()
     start_condition = multiprocessing.Condition()
     mp_target = [progress_levels, get_collectables, levelup_heroes]
+    # mp_target = [progress_levels]
     # mp_target = [levelup_heroes]
-    start_barrier=multiprocessing.Barrier(len(mp_target))
+    start_barrier = multiprocessing.Barrier(len(mp_target))
     proc = []
     for target in mp_target:
-        proc.append(Process(target=target, args=(c_lock,start_barrier,)))
+        proc.append(Process(target=target, args=(c_lock, start_barrier,)))
     for p in proc:
         p.start()
 
