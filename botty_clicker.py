@@ -2417,7 +2417,6 @@ class ClickerHeroes(metaclass=Singleton):
         self.window.makeScreenshotClientAreaRegion()
         menu_name = 'heroes'
         max_seen_hero = self.get_max_seen_hero(menu_name)
-        last_ascend_seen_heroes=self.get_last_ascend_seen_heroes(menu_name)
         if max_seen_hero is None:
             return None
         self.scroll_to_hero(menu_name, max_seen_hero)
@@ -2468,7 +2467,7 @@ class ClickerHeroes(metaclass=Singleton):
 
             button_edge_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern('heroes_button', 'edge_'),
                                                                   cache=False)
-            if button_edge_reg is None:
+            if not button_edge_reg :
                 continue
             button_edge_reg = button_edge_reg[0]
             hero_name_reg = hero_reg_scr.find_pattern_from_list(self.get_pattern(menu_name, hero_name))
@@ -2768,13 +2767,18 @@ class Window:
     def scroll(self, direction, x=1, y=1):
         with self.lock:
             tmp = (y << 16) | x
-            SendMessage(self.hwnd, WM_MOUSEWHEEL,
+            time1 = time.clock()
+            err=0
+            err+=SendMessage(self.hwnd, WM_MOUSEWHEEL,
                         (WHEEL_DELTA * direction) << 16, tmp)
             time.sleep(0.02)
             x = 1
             y = 1
             tmp = (y << 16) | x
-            SendMessage(self.hwnd, WM_MOUSEMOVE, 0, tmp)
+            err +=SendMessage(self.hwnd, WM_MOUSEMOVE, 0, tmp)
+            time2 = time.clock()
+            if time2-time1>1 or err >0:
+                print("scroll: got delay > 1 sec %s err %" % (time2-time1,err))
 
     def scrollDown(self):
         self.scrollDown(1, 1)
@@ -2802,10 +2806,16 @@ class Window:
         # if park:
         #     delay /= 2
 
-        err = 0
+
         with self.lock:
+            err = 0
+            time1=time.clock()
             err += SendMessage(self.hwnd, WM_LBUTTONDOWN, 0, tmp)
             err += SendMessage(self.hwnd, WM_LBUTTONUP, 0, tmp)
+            time2=time.clock()
+            if time2 - time1 > 1 or err > 0:
+                print("scroll: got delay > 1 sec %s err %" % (time2 - time1, err))
+
             time.sleep(delay)
             if park:
                 x = 1
@@ -3062,8 +3072,8 @@ def levelup_heroes(click_lock,start_barrier):
         ch.lvlup_top_heroes('heroes')
         # ch.buy_quick_ascension()
 
-        ch.lvlup_all_heroes('heroes', timer=300)
-        ch.buy_available_upgrades(upgrades_timer=300)
+        ch.lvlup_all_heroes('heroes', timer=600)
+        ch.buy_available_upgrades(upgrades_timer=600)
         ch.ascend(ascension_life=7200, check_timer=30, check_progress=False)
         # except Exception as e:
         #     print("levelup_heroes:Exception:%s" % repr(e))
