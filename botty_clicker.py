@@ -3065,7 +3065,9 @@ def levelup_heroes(click_lock, start_barrier):
         # try:
         # i+=1
         # time1=time.clock()
-        # ch.window.makeScreenshotClientAreaRegion()
+        ch.window.makeScreenshotClientAreaRegion()
+
+        cv2.imsave('D:\\tmp\\scr', ch.window.getScreenshot().get_array())
         # cv2.imshow('Test screenshot', ch.window.getScreenshot().get_array())
         # cv2.waitKey(10)
         # time.sleep(10)
